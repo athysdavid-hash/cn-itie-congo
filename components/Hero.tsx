@@ -4,39 +4,39 @@ import { ArrowRight } from 'lucide-react';
 
 export default function Hero() {
   return (
-    <section className="relative bg-slate-900 text-white min-h-[500px] flex items-center overflow-hidden">
-      {/* Background Image / Overlay */}
+    <section className="relative bg-slate-900 text-white min-h-[500px] flex items-center py-20 px-6 overflow-hidden">
+      {/* Image de fond composite (pétrole, mines, forêt) */}
       <div 
-        className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-overlay"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1600&auto=format&fit=crop')`
+          backgroundImage: "url('/images/hero-bg.jpeg')"
         }}
       />
-      <div className="absolute inset-0 bg-linear-to-r from-slate-950/90 via-slate-900/70 to-transparent" />
+      
+      {/* Overlay sombre dégradé pour garantir une excellente lisibilité du texte */}
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/75 to-slate-950/40" />
 
-      {/* Content */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-8 py-20 z-10">
-        <div className="max-w-2xl space-y-6">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight">
+      {/* Contenu textuel */}
+      <div className="relative max-w-7xl mx-auto w-full z-10">
+        <div className="max-w-3xl">
+          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight text-white">
             Promouvoir la transparence pour une gestion durable des ressources naturelles
           </h1>
-          <p className="text-slate-200 text-base sm:text-lg leading-relaxed">
-            L&apos;ITIE Congo rassemble le gouvernement, les entreprises et la société civile pour plus de transparence et de redevabilité dans la gestion des revenus extractifs.
+          <p className="mt-4 text-base md:text-lg text-slate-300 leading-relaxed font-normal">
+            L'ITIE Congo rassemble le gouvernement, les entreprises et la société civile pour plus de transparence et de redevabilité dans la gestion des revenus extractifs.
           </p>
-          <div className="flex flex-wrap gap-4 pt-4">
-            <Link 
-              href="#" 
-              className="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white font-semibold px-6 py-3 rounded-md transition shadow-md"
+          <div className="mt-8 flex flex-wrap gap-4">
+            <Link
+              href="/a-propos"
+              className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm rounded-xl transition-colors shadow-lg shadow-emerald-900/40 inline-flex items-center gap-2"
             >
-              EN SAVOIR PLUS
-              <ArrowRight className="w-4 h-4" />
+              En savoir plus <ArrowRight className="w-4 h-4" />
             </Link>
-            <Link 
-              href="#" 
-              className="inline-flex items-center gap-2 border border-white/60 hover:border-white hover:bg-white/10 text-white font-semibold px-6 py-3 rounded-md transition"
+            <Link
+              href="/publications"
+              className="px-6 py-3.5 bg-slate-900/80 hover:bg-slate-800 text-white border border-slate-700 font-semibold text-sm rounded-xl transition-colors inline-flex items-center gap-2 backdrop-blur-sm"
             >
-              DÉCOUVRIR L&apos;ITIE
-              <ArrowRight className="w-4 h-4" />
+              Découvrir l'ITIE <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
