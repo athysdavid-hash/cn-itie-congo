@@ -1,52 +1,50 @@
-import { Users, Calendar, FileText, ShieldCheck } from 'lucide-react';
+import React from 'react';
+import { Users, FileText, Calendar, ShieldCheck } from 'lucide-react';
+
+const stats = [
+  {
+    icon: Users,
+    value: '3 Collèges',
+    label: 'Gouvernement, Entreprises, Société civile',
+  },
+  {
+    icon: Calendar,
+    value: 'Depuis 2004',
+    label: 'Le Congo est pays membre de l\'ITIE',
+  },
+  {
+    icon: FileText,
+    value: '16 Rapports ITIE',
+    label: 'Publiés et accessibles au public',
+  },
+  {
+    icon: ShieldCheck,
+    value: 'Transparence',
+    label: 'Norme internationale de bonne gouvernance',
+  },
+];
 
 export default function Stats() {
   return (
-    <section className="bg-slate-950 text-white border-b border-slate-800">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto px-6 py-8">
-        {/* Carte 1 */}
-        <div className="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl flex items-center gap-4">
-          <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl">
-            <Users className="w-6 h-6" />
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-white">3 Collèges</h3>
-            <p className="text-xs text-slate-400 mt-1">Gouvernement, Entreprises, Société civile</p>
-          </div>
-        </div>
-
-        {/* Carte 2 : Date d'adhésion */}
-        <div className="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl flex items-center gap-4">
-          <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl">
-            <Calendar className="w-6 h-6" />
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-white">10 Juin 2004</h3>
-            <p className="text-xs text-slate-400 mt-1">Date d'adhésion du Congo à l'ITIE</p>
-          </div>
-        </div>
-
-        {/* Carte 3 : Nombre de rapports */}
-        <div className="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl flex items-center gap-4">
-          <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl">
-            <FileText className="w-6 h-6" />
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-white">16 Rapports ITIE</h3>
-            <p className="text-xs text-slate-400 mt-1">Publiés et accessibles au public</p>
-          </div>
-        </div>
-
-        {/* Carte 4 */}
-        <div className="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl flex items-center gap-4">
-          <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl">
-            <ShieldCheck className="w-6 h-6" />
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-white">Transparence</h3>
-            <p className="text-xs text-slate-400 mt-1">Redevabilité et bonne gouvernance</p>
-          </div>
-        </div>
+    <section className="bg-slate-900 border-t border-slate-800 text-white py-10 px-6">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <div
+              key={index}
+              className="flex items-center gap-4 bg-slate-800/60 p-5 rounded-2xl border border-slate-700/50 backdrop-blur-sm"
+            >
+              <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
+                <Icon className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="text-xl font-bold text-white">{stat.value}</div>
+                <div className="text-xs text-slate-400 mt-0.5">{stat.label}</div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
