@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MapPin, Layers, Compass, ExternalLink } from 'lucide-react';
+import { MapPin, Compass, ExternalLink } from 'lucide-react';
 
 interface Zone {
   id: string;
@@ -10,7 +10,7 @@ interface Zone {
   region: string;
   status: string;
   operator: string;
-  coordinates: { top: string; left: string }; // Position visuelle sur la carte
+  coordinates: { top: string; left: string };
 }
 
 const zonesData: Zone[] = [
@@ -21,7 +21,7 @@ const zonesData: Zone[] = [
     region: 'Kouilou / Pointe-Noire',
     status: 'En exploitation',
     operator: 'TotalEnergies / Eni Congo',
-    coordinates: { top: '82%', left: '18%' },
+    coordinates: { top: '82%', left: '25%' },
   },
   {
     id: '2',
@@ -30,7 +30,7 @@ const zonesData: Zone[] = [
     region: 'Niari',
     status: 'Permis d\'exploitation',
     operator: 'Sapro Mayoko',
-    coordinates: { top: '68%', left: '28%' },
+    coordinates: { top: '68%', left: '32%' },
   },
   {
     id: '3',
@@ -39,7 +39,7 @@ const zonesData: Zone[] = [
     region: 'Sangha',
     status: 'Gestion durable (FSC)',
     operator: 'CIB-Olam',
-    coordinates: { top: '25%', left: '60%' },
+    coordinates: { top: '28%', left: '55%' },
   },
   {
     id: '4',
@@ -48,7 +48,7 @@ const zonesData: Zone[] = [
     region: 'Kouilou',
     status: 'Développement',
     operator: 'Kore Potash',
-    coordinates: { top: '78%', left: '22%' },
+    coordinates: { top: '78%', left: '20%' },
   },
   {
     id: '5',
@@ -57,7 +57,7 @@ const zonesData: Zone[] = [
     region: 'Likouala',
     status: 'Concession attribuée',
     operator: 'Société Forestière de la Likouala',
-    coordinates: { top: '18%', left: '75%' },
+    coordinates: { top: '20%', left: '68%' },
   },
 ];
 
@@ -109,21 +109,28 @@ export default function InteractiveMap() {
           </div>
         </div>
 
-        {/* Grille Carte + Panneau d'informations */}
+        {/* Grille Carte + Fiche */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
           
-          {/* Carte visuelle SVG du Congo */}
-          <div className="lg:col-span-2 bg-slate-950/80 rounded-2xl p-6 border border-slate-800 relative min-h-[380px] flex items-center justify-center overflow-hidden">
+          {/* Zone Carte avec SVG de fond */}
+          <div className="lg:col-span-2 bg-slate-950/90 rounded-2xl p-6 border border-slate-800 relative min-h-[400px] flex items-center justify-center overflow-hidden">
             
-            {/* Arrière-plan graphique de carte */}
-            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:16px_16px]" />
+            {/* Grille d'arrière-plan */}
+            <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:16px_16px]" />
             
-            {/* Représentation schématique légère du Congo */}
-            <div className="relative w-full max-w-md h-[340px] flex items-center justify-center">
+            <div className="relative w-full max-w-sm h-[360px] flex items-center justify-center">
               
-              <div className="absolute text-slate-700 text-xs font-bold tracking-widest top-4 right-6 uppercase">
-                République du Congo
-              </div>
+              {/* Silhouette SVG simplifiée du Congo */}
+              <svg 
+                viewBox="0 0 200 300" 
+                className="absolute inset-0 w-full h-full text-slate-800/60 fill-current stroke-slate-700/80 stroke-1"
+              >
+                <path d="M 120 20 C 150 40, 180 70, 160 120 C 140 160, 100 180, 80 220 C 60 250, 40 270, 20 280 C 15 270, 30 240, 50 210 C 70 180, 85 140, 90 90 C 95 50, 105 25, 120 20 Z" />
+              </svg>
+
+              <span className="absolute text-slate-600 text-[10px] font-bold tracking-widest top-2 right-2 uppercase">
+                RÉPUBLIQUE DU CONGO
+              </span>
 
               {/* Points d'intérêt interactifs */}
               {filteredZones.map((zone) => {
@@ -137,16 +144,16 @@ export default function InteractiveMap() {
                       isSelected ? 'scale-125 z-20' : 'hover:scale-110 z-10'
                     }`}
                   >
-                    <span className="relative flex h-5 w-5 items-center justify-center">
+                    <span className="relative flex h-6 w-6 items-center justify-center">
                       <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
                         zone.sector === 'Pétrole' ? 'bg-sky-400' : zone.sector === 'Mines' ? 'bg-amber-400' : 'bg-emerald-400'
                       }`} />
-                      <span className={`relative inline-flex rounded-full h-3.5 w-3.5 border-2 border-slate-900 ${
+                      <span className={`relative inline-flex rounded-full h-4 w-4 border-2 border-slate-900 ${
                         zone.sector === 'Pétrole' ? 'bg-sky-500' : zone.sector === 'Mines' ? 'bg-amber-500' : 'bg-emerald-500'
                       }`} />
                     </span>
 
-                    {/* Infobulle au survol */}
+                    {/* Tooltip au survol */}
                     <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block whitespace-nowrap bg-slate-800 text-white text-[10px] font-medium px-2 py-1 rounded shadow-md border border-slate-700">
                       {zone.name}
                     </span>
