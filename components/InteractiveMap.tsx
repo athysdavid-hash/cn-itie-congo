@@ -1,272 +1,202 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { 
-  Search, 
-  Layers, 
-  X, 
-  Download, 
-  MapPin, 
-  Building2, 
-  Calendar, 
-  Filter
-} from 'lucide-react';
+import React, { useState } from 'react';
+import { MapPin, Layers, Compass, ExternalLink } from 'lucide-react';
 
-interface Concession {
+interface Zone {
   id: string;
   name: string;
-  sector: 'petrole' | 'mines' | 'foret';
-  status: 'production' | 'exploration' | 'attr';
-  operator: string;
-  substance: string;
-  surface: string;
+  sector: 'Pétrole' | 'Mines' | 'Forêt';
   region: string;
-  grantDate: string;
-  expiryDate: string;
-  contractUrl: string;
-  reportUrl: string;
+  status: string;
+  operator: string;
+  coordinates: { top: string; left: string }; // Position visuelle sur la carte
 }
 
-const mockData: Concession[] = [
+const zonesData: Zone[] = [
   {
-    id: 'M-01',
-    name: 'Permis Mayoko-Moussondji',
-    sector: 'mines',
-    status: 'exploration',
-    operator: 'Sapro Mayoko / Congo Mining',
-    substance: 'Minerai de Fer',
-    surface: '850 km²',
+    id: '1',
+    name: 'Champs Off-shore Pointe-Noire',
+    sector: 'Pétrole',
+    region: 'Kouilou / Pointe-Noire',
+    status: 'En exploitation',
+    operator: 'TotalEnergies / Eni Congo',
+    coordinates: { top: '82%', left: '18%' },
+  },
+  {
+    id: '2',
+    name: 'Gisement de Fer de Mayoko',
+    sector: 'Mines',
     region: 'Niari',
-    grantDate: '2014-06-12',
-    expiryDate: '2029-06-12',
-    contractUrl: '#',
-    reportUrl: '#'
+    status: 'Permis d\'exploitation',
+    operator: 'Sapro Mayoko',
+    coordinates: { top: '68%', left: '28%' },
   },
   {
-    id: 'P-02',
-    name: 'Bloc Marine XII',
-    sector: 'petrole',
-    status: 'production',
-    operator: 'Eni Congo',
-    substance: 'Pétrole Brut & Gaz Naturel (GNL)',
-    surface: '580 km²',
-    region: 'Kouilou (Offshore)',
-    grantDate: '2008-04-18',
-    expiryDate: '2033-04-18',
-    contractUrl: '#',
-    reportUrl: '#'
-  },
-  {
-    id: 'F-03',
-    name: 'UFA Kabo (Concession Forestière)',
-    sector: 'foret',
-    status: 'production',
-    operator: 'IFO (Interholco)',
-    substance: 'Bois d\'œuvre (Sapelli, Sipo, Ayous)',
-    surface: '2 670 km²',
+    id: '3',
+    name: 'Concession Forestière Pokola',
+    sector: 'Forêt',
     region: 'Sangha',
-    grantDate: '2006-11-03',
-    expiryDate: '2031-11-03',
-    contractUrl: '#',
-    reportUrl: '#'
-  }
+    status: 'Gestion durable (FSC)',
+    operator: 'CIB-Olam',
+    coordinates: { top: '25%', left: '60%' },
+  },
+  {
+    id: '4',
+    name: 'Gisement de Potasse du Kouilou',
+    sector: 'Mines',
+    region: 'Kouilou',
+    status: 'Développement',
+    operator: 'Kore Potash',
+    coordinates: { top: '78%', left: '22%' },
+  },
+  {
+    id: '5',
+    name: 'Bloc Forestier de Likouala',
+    sector: 'Forêt',
+    region: 'Likouala',
+    status: 'Concession attribuée',
+    operator: 'Société Forestière de la Likouala',
+    coordinates: { top: '18%', left: '75%' },
+  },
 ];
 
 export default function InteractiveMap() {
-  const [selectedConcession, setSelectedConcession] = useState<Concession | null>(null);
-  const [sectorFilter, setSectorFilter] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [mounted, setMounted] = useState(false);
+  const [selectedZone, setSelectedZone] = useState<Zone>(zonesData[0]);
+  const [filter, setFilter] = useState<string>('Tous');
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const filteredZones = filter === 'Tous' 
+    ? zonesData 
+    : zonesData.filter(z => z.sector === filter);
 
-  const filteredData = mockData.filter((item) => {
-    const matchesSector = sectorFilter === 'all' || item.sector === sectorFilter;
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          item.operator.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          item.region.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSector && matchesSearch;
-  });
-
-  if (!mounted) return null;
+  const getBadgeColor = (sector: string) => {
+    switch (sector) {
+      case 'Pétrole': return 'bg-sky-500 text-white';
+      case 'Mines': return 'bg-amber-500 text-white';
+      case 'Forêt': return 'bg-emerald-600 text-white';
+      default: return 'bg-slate-600 text-white';
+    }
+  };
 
   return (
-    <div className="relative w-full h-[calc(100vh-5rem)] flex overflow-hidden bg-slate-900 font-sans">
-      {/* Barre de contrôle / Filtres à gauche */}
-      <div className="w-80 bg-slate-900 border-r border-slate-800 p-4 flex flex-col z-10 text-white shadow-xl">
-        <div className="mb-4">
-          <h2 className="text-lg font-bold text-emerald-400 flex items-center gap-2">
-            <Layers className="w-5 h-5" /> Cadastre ITIE Congo
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Cartographie des titres et concessions extractives.
-          </p>
-        </div>
+    <section className="bg-slate-900 text-white py-12 px-6">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* En-tête de la section */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+          <div>
+            <div className="flex items-center gap-2 text-emerald-400 font-semibold text-xs tracking-wider uppercase mb-1">
+              <Compass className="w-4 h-4" /> Cadastre Extractif Interactif
+            </div>
+            <h2 className="text-2xl md:text-3xl font-extrabold">Aperçu des Titres & Concessions</h2>
+          </div>
 
-        {/* Barre de recherche */}
-        <div className="relative mb-4">
-          <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Rechercher un permis, une société..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-800 text-sm text-slate-200 pl-9 pr-3 py-2 rounded-lg border border-slate-700 focus:outline-none focus:border-emerald-500"
-          />
-        </div>
-
-        {/* Filtres par secteur */}
-        <div className="mb-4">
-          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2 flex items-center gap-1">
-            <Filter className="w-3 h-3" /> Secteurs d'activité
-          </label>
-          <div className="grid grid-cols-2 gap-2">
-            {[
-              { id: 'all', label: 'Tous' },
-              { id: 'petrole', label: '🛢️ Pétrole' },
-              { id: 'mines', label: '⛏️ Mines' },
-              { id: 'foret', label: '🌲 Forêts' },
-            ].map((s) => (
+          {/* Filtres par secteur */}
+          <div className="flex items-center gap-2 bg-slate-800 p-1 rounded-xl border border-slate-700 self-start md:self-auto">
+            {['Tous', 'Pétrole', 'Mines', 'Forêt'].map((sec) => (
               <button
-                key={s.id}
-                onClick={() => setSectorFilter(s.id)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md border transition-colors text-left ${
-                  sectorFilter === s.id
-                    ? 'bg-emerald-600 border-emerald-500 text-white'
-                    : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                key={sec}
+                onClick={() => setFilter(sec)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  filter === sec
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
                 }`}
               >
-                {s.label}
+                {sec}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Liste des concessions */}
-        <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-          <p className="text-xs text-slate-400 mb-1">
-            {filteredData.length} zone(s) trouvée(s)
-          </p>
-          {filteredData.map((item) => (
-            <div
-              key={item.id}
-              onClick={() => setSelectedConcession(item)}
-              className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                selectedConcession?.id === item.id
-                  ? 'bg-slate-800 border-emerald-500 shadow-md'
-                  : 'bg-slate-800/50 border-slate-700/50 hover:bg-slate-800 hover:border-slate-600'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                  item.sector === 'petrole' ? 'bg-blue-500/20 text-blue-400' :
-                  item.sector === 'mines' ? 'bg-amber-500/20 text-amber-400' :
-                  'bg-emerald-500/20 text-emerald-400'
-                }`}>
-                  {item.sector.toUpperCase()}
-                </span>
-                <span className="text-xs text-slate-400">{item.surface}</span>
+        {/* Grille Carte + Panneau d'informations */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+          
+          {/* Carte visuelle SVG du Congo */}
+          <div className="lg:col-span-2 bg-slate-950/80 rounded-2xl p-6 border border-slate-800 relative min-h-[380px] flex items-center justify-center overflow-hidden">
+            
+            {/* Arrière-plan graphique de carte */}
+            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:16px_16px]" />
+            
+            {/* Représentation schématique légère du Congo */}
+            <div className="relative w-full max-w-md h-[340px] flex items-center justify-center">
+              
+              <div className="absolute text-slate-700 text-xs font-bold tracking-widest top-4 right-6 uppercase">
+                République du Congo
               </div>
-              <h4 className="text-sm font-semibold text-slate-100">{item.name}</h4>
-              <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-                <Building2 className="w-3 h-3 text-slate-500" /> {item.operator}
-              </p>
+
+              {/* Points d'intérêt interactifs */}
+              {filteredZones.map((zone) => {
+                const isSelected = selectedZone.id === zone.id;
+                return (
+                  <button
+                    key={zone.id}
+                    onClick={() => setSelectedZone(zone)}
+                    style={{ top: zone.coordinates.top, left: zone.coordinates.left }}
+                    className={`absolute -translate-x-1/2 -translate-y-1/2 group transition-transform ${
+                      isSelected ? 'scale-125 z-20' : 'hover:scale-110 z-10'
+                    }`}
+                  >
+                    <span className="relative flex h-5 w-5 items-center justify-center">
+                      <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                        zone.sector === 'Pétrole' ? 'bg-sky-400' : zone.sector === 'Mines' ? 'bg-amber-400' : 'bg-emerald-400'
+                      }`} />
+                      <span className={`relative inline-flex rounded-full h-3.5 w-3.5 border-2 border-slate-900 ${
+                        zone.sector === 'Pétrole' ? 'bg-sky-500' : zone.sector === 'Mines' ? 'bg-amber-500' : 'bg-emerald-500'
+                      }`} />
+                    </span>
+
+                    {/* Infobulle au survol */}
+                    <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block whitespace-nowrap bg-slate-800 text-white text-[10px] font-medium px-2 py-1 rounded shadow-md border border-slate-700">
+                      {zone.name}
+                    </span>
+                  </button>
+                );
+              })}
+
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      {/* Zone d'affichage de la carte (Iframe fiable avec CDN direct) */}
-      <div className="flex-1 relative bg-slate-950">
-        <iframe
-          title="Cartographie ITIE Congo"
-          srcDoc={`
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-              <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-              <style>
-                body { margin: 0; padding: 0; background: #0f172a; }
-                #map { width: 100vw; height: 100vh; }
-              </style>
-            </head>
-            <body>
-              <div id="map"></div>
-              <script>
-                var map = L.map('map').setView([-0.8, 15.2], 6);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                  attribution: '© OpenStreetMap & ITIE Congo'
-                }).addTo(map);
-              </script>
-            </body>
-            </html>
-          `}
-          className="w-full h-full border-none"
-        />
-      </div>
-
-      {/* Panneau d'informations à droite */}
-      {selectedConcession && (
-        <div className="absolute top-4 right-4 w-96 bg-slate-900/95 backdrop-blur-md border border-slate-700 text-white rounded-xl shadow-2xl p-5 z-20 transition-all">
-          <div className="flex items-start justify-between border-b border-slate-800 pb-3 mb-4">
+          {/* Fiche d'information du point sélectionné */}
+          <div className="bg-slate-800/80 rounded-2xl p-6 border border-slate-700 flex flex-col justify-between">
             <div>
-              <span className={`text-xs font-bold px-2 py-0.5 rounded ${
-                selectedConcession.sector === 'petrole' ? 'bg-blue-500/20 text-blue-400' :
-                selectedConcession.sector === 'mines' ? 'bg-amber-500/20 text-amber-400' :
-                'bg-emerald-500/20 text-emerald-400'
-              }`}>
-                {selectedConcession.sector.toUpperCase()}
-              </span>
-              <h3 className="text-lg font-bold text-white mt-1">{selectedConcession.name}</h3>
-            </div>
-            <button
-              onClick={() => setSelectedConcession(null)}
-              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+              <div className="flex items-center justify-between mb-4">
+                <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full ${getBadgeColor(selectedZone.sector)}`}>
+                  {selectedZone.sector}
+                </span>
+                <span className="text-xs text-slate-400 flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-emerald-400" /> {selectedZone.region}
+                </span>
+              </div>
 
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between border-b border-slate-800/60 pb-2">
-              <span className="text-slate-400 flex items-center gap-1.5"><Building2 className="w-4 h-4" /> Opérateur :</span>
-              <span className="font-semibold text-slate-200 text-right">{selectedConcession.operator}</span>
-            </div>
-
-            <div className="flex justify-between border-b border-slate-800/60 pb-2">
-              <span className="text-slate-400">Substance :</span>
-              <span className="font-semibold text-slate-200">{selectedConcession.substance}</span>
+              <h3 className="text-xl font-bold text-white mb-2">{selectedZone.name}</h3>
+              
+              <div className="space-y-3 mt-6 text-sm">
+                <div className="border-b border-slate-700/60 pb-2">
+                  <span className="text-xs text-slate-400 block">Opérateur / Titulaire</span>
+                  <span className="font-semibold text-slate-200">{selectedZone.operator}</span>
+                </div>
+                
+                <div className="border-b border-slate-700/60 pb-2">
+                  <span className="text-xs text-slate-400 block">Statut du permis</span>
+                  <span className="font-semibold text-emerald-400">{selectedZone.status}</span>
+                </div>
+              </div>
             </div>
 
-            <div className="flex justify-between border-b border-slate-800/60 pb-2">
-              <span className="text-slate-400 flex items-center gap-1.5"><MapPin className="w-4 h-4" /> Région :</span>
-              <span className="font-semibold text-slate-200">{selectedConcession.region}</span>
-            </div>
-
-            <div className="flex justify-between border-b border-slate-800/60 pb-2">
-              <span className="text-slate-400">Superficie :</span>
-              <span className="font-semibold text-slate-200">{selectedConcession.surface}</span>
-            </div>
-
-            <div className="flex justify-between border-b border-slate-800/60 pb-2">
-              <span className="text-slate-400 flex items-center gap-1.5"><Calendar className="w-4 h-4" /> Expiration :</span>
-              <span className="font-semibold text-emerald-400">{selectedConcession.expiryDate}</span>
+            <div className="mt-8 pt-4 border-t border-slate-700/80">
+              <a
+                href="/cadastre"
+                className="w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold text-xs rounded-xl transition-colors flex items-center justify-center gap-2"
+              >
+                Accéder au cadastre complet <ExternalLink className="w-3.5 h-3.5" />
+              </a>
             </div>
           </div>
 
-          <div className="mt-6 space-y-2">
-            <a
-              href={selectedConcession.contractUrl}
-              className="w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium text-xs flex items-center justify-center gap-2 transition-colors"
-            >
-              <Download className="w-4 h-4" /> Télécharger le contrat
-            </a>
-          </div>
         </div>
-      )}
-    </div>
+
+      </div>
+    </section>
   );
 }
